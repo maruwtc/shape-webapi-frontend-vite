@@ -21,7 +21,8 @@ import {
   FiLogIn,
   FiDatabase,
   FiMessageCircle,
-  FiUser
+  FiUser,
+  FiHeart
 } from 'react-icons/fi';
 import { IconType } from 'react-icons';
 import { ReactText } from 'react';
@@ -36,6 +37,7 @@ const LinkItems: Array<LinkItemProps> = [
   { name: 'Home', icon: FiHome, href: '/' },
   { name: 'Inventory', icon: FiDatabase, href: '/inventory' },
   { name: 'Chat', icon: FiMessageCircle, href: '/chat' },
+  { name: 'Wishlist', icon: FiHeart, href: '/wishlist' },
   { name: 'Profile', icon: FiUser, href: '/profile' },
   { name: 'Login', icon: FiLogIn, href: '/login' },
 ];
@@ -118,7 +120,7 @@ const NavItem = ({ icon, children, href, ...rest }: NavItemProps) => {
         role="group"
         cursor="pointer"
         _hover={{
-          bg: 'cyan.400',
+          bg: 'blue.700',
           color: 'white',
         }}
         {...rest}>
