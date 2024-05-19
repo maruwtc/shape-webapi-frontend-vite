@@ -9,7 +9,6 @@ export const HandleLogin = async (email: string, password: string, toast: any) =
     body: JSON.stringify({ email, password }),
   });
   if (!response.ok) {
-    console.log(response);
     toast({
       title: 'Error',
       description: 'An error occurred',
@@ -21,7 +20,6 @@ export const HandleLogin = async (email: string, password: string, toast: any) =
     return false;
   } else {
     const data = await response.json();
-    console.log(data);
     if (data.error) {
       toast({
         title: 'Error',
@@ -41,25 +39,27 @@ export const HandleLogin = async (email: string, password: string, toast: any) =
         isClosable: true,
         position: 'top',
       });
-      sessionStorage.setItem('token', data.token);
-      window.location.href = '/profile';
+      setTimeout(() => {
+        sessionStorage.setItem('token', data.token);
+        window.location.href = '/profile';
+      }, 2000);
       return true;
     }
   }
 }
 
 export const HandleLogout = () => {
-  sessionStorage.removeItem('token');
+  sessionStorage.clear();
   window.location.href = '/login';
 }
 
-export const HandleSignup = async (email: string, password: string, toast: any) => {
-  const response = await fetch(config.api_url + '/api/v1/signup', {
+export const HandleSignup = async (email: string, password: string, role: string, toast: any) => {
+  const response = await fetch(config.api_url + '/api/v1/register', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, role: role ? role : 'user' }),
   });
   if (!response.ok) {
     toast({
@@ -92,7 +92,6 @@ export const HandleSignup = async (email: string, password: string, toast: any) 
         isClosable: true,
         position: 'top',
       });
-      sessionStorage.setItem('email', email);
       sessionStorage.setItem('token', data.token);
       window.location.href = '/profile';
       return true;
@@ -117,7 +116,6 @@ export const CheckAuth = async () => {
     if (data.error) {
       if (data.error === 'Token expired') {
         sessionStorage.removeItem('token');
-        console.log('Token expired');
         window.location.href = '/login';
       }
       return false;
@@ -145,6 +143,7 @@ export const GetUsername = async () => {
       uid: data.uid,
       username: data.email.split('@')[0],
       email: data.email,
+      role: data.role,
     };
   }
 };
@@ -192,6 +191,28 @@ export const DeleteAccount = async (toast: any) => {
       });
       sessionStorage.removeItem('token');
       window.location.href = '/login';
+      return true;
+    }
+  }
+}
+
+export const CheckAdmin = async () => {
+  const response = await fetch(config.api_url + '/api/v1/checkadmin', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      token: sessionStorage.getItem('token'),
+    }),
+  });
+  if (!response.ok) {
+    return false;
+  } else {
+    const data = await response.json();
+    if (data.error) {
+      return false;
+    } else {
       return true;
     }
   }
