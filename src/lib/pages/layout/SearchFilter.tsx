@@ -19,8 +19,14 @@ const SearchFilter = ({
     isAccordionOpen,
     setIsAccordionOpen,
     pets,
+}: {
+    searchQuery: string;
+    setSearchQuery: (query: string) => void;
+    isAccordionOpen: boolean;
+    setIsAccordionOpen: (isOpen: boolean) => void;
+    pets: any[];
 }) => {
-    const handleInputChange = (event) => {
+    const handleInputChange = (event: any) => {
         setSearchQuery(event.target.value);
     };
 
@@ -61,9 +67,9 @@ const SearchFilter = ({
                     <Heading size='md'>Filter by:</Heading>
                     <Flex direction='column'>
                         <Flex pb={3}>
-                            <Text>Species:</Text>
-                            {pets.map((pet, index, array) => {
-                                const isDuplicate = array.findIndex((item) => item.breed === pet.breed) !== index;
+                            <Text>Breed:</Text>
+                            {pets.map((pet: any, index: any, array: any) => {
+                                const isDuplicate = array.findIndex((item: any) => item.breed === pet.breed) !== index;
                                 if (!pet.breed || isDuplicate) {
                                     return null;
                                 }
@@ -80,8 +86,8 @@ const SearchFilter = ({
                         </Flex>
                         <Flex>
                             <Text>Location:</Text>
-                            {pets.map((pet, index, array) => {
-                                const isDuplicate = array.findIndex((item) => item.location === pet.location) !== index;
+                            {pets.map((pet: any, index: any, array: any) => {
+                                const isDuplicate = array.findIndex((item: any) => item.location === pet.location) !== index;
                                 if (!pet.location || isDuplicate) {
                                     return null;
                                 }

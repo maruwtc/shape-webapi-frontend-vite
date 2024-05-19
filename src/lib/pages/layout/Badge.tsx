@@ -1,6 +1,6 @@
 import { Badge, useColorModeValue } from '@chakra-ui/react';
 
-const RenderBadge = ({ label, value, colorScheme, onClick }) => {
+const RenderBadge = ({ label, value, colorScheme, onClick }: { label: string, value: string, colorScheme: string, onClick: (value: string) => void }) => {
   return (
     <Badge
       key={`${label}-${value}`}
