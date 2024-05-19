@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import {
   IconButton,
   Box,
@@ -27,6 +27,7 @@ import {
 import { IconType } from 'react-icons';
 import { ReactText } from 'react';
 import ThemeToggle from './ThemeToggle';
+import { CheckAuth } from '../components/Firebase';
 
 interface LinkItemProps {
   name: string;
@@ -39,11 +40,12 @@ const LinkItems: Array<LinkItemProps> = [
   { name: 'Chat', icon: FiMessageCircle, href: '/chat' },
   { name: 'Wishlist', icon: FiHeart, href: '/wishlist' },
   { name: 'Profile', icon: FiUser, href: '/profile' },
-  { name: 'Login', icon: FiLogIn, href: '/login' },
+  // { name: 'Login', icon: FiLogIn, href: '/login' },
 ];
 
 export default function Sidebar({ children }: { children: ReactNode }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
     <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
       <SidebarContent
@@ -78,6 +80,12 @@ interface SidebarProps extends BoxProps {
 }
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
+  const [isAuth, setIsAuth] = useState(false);
+  useEffect(() => {
+    CheckAuth().then((res: any) => {
+      setIsAuth(res);
+    });
+  }, []);
   return (
     <Box
       bg={useColorModeValue('white', 'gray.900')}
@@ -98,7 +106,11 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
           {link.name}
         </NavItem>
       ))}
-
+      {isAuth ? null : (
+        <NavItem key="Login" icon={FiLogIn} href="/login">
+          Login
+        </NavItem>
+      )}
     </Box>
   );
 };
