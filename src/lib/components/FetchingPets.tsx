@@ -26,10 +26,8 @@ export const GetIdPet = async (id: string) => {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                'token': String(sessionStorage.getItem('token'))
             },
-            body: JSON.stringify({
-                token: sessionStorage.getItem('token'),
-            }),
         });
         if (!response.ok) {
             return {};
@@ -45,7 +43,6 @@ export const GetIdPet = async (id: string) => {
 
 export const CreatePet = async (pet: any) => {
     try {
-        console.log(pet);
         const response = await fetch(config.api_url + '/api/v1/pets', {
             method: 'POST',
             headers: {
@@ -132,3 +129,72 @@ export const UploadImage = async (base64Image: any) => {
     const data = await response.json();
     return data.url;
 };
+
+export const GetWishlist = async (id: string) => {
+    try {
+        const response = await fetch(config.api_url + '/api/v1/users/'+ id +'/wishlist', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json', 
+                'token': String(sessionStorage.getItem('token'))
+            },
+        });
+        if (!response.ok) {
+            return [];
+        } else {
+            const data = await response.json();
+            return data;
+        }
+    } catch (error) {
+        console.error('Failed to fetch wishlist:', error);
+        return [];
+    }
+}
+
+export const AddToWishlist = async (id: string, petId: string) => {
+    try {
+        const response = await fetch(config.api_url + '/api/v1/users/'+ id +'/wishlist', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': String(sessionStorage.getItem('token'))
+            },
+            body: JSON.stringify({
+                "wishlist": petId
+            }),
+        });
+        if (!response.ok) {
+            return {};
+        } else {
+            const data = await response.json();
+            return data;
+        }
+    } catch (error) {
+        console.error('Failed to add to wishlist:', error);
+        return {};
+    }
+}
+
+export const RemoveFromWishlist = async (id: string, petId: string) => {
+    try {
+        const response = await fetch(config.api_url + '/api/v1/users/'+ id +'/wishlist', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': String(sessionStorage.getItem('token'))
+            },
+            body: JSON.stringify({
+                "wishlist": petId
+            }),
+        });
+        if (!response.ok) {
+            return {};
+        } else {
+            const data = await response.json();
+            return data;
+        }
+    } catch (error) {
+        console.error('Failed to remove from wishlist:', error);
+        return {};
+    }
+}

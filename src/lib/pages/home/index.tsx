@@ -8,18 +8,26 @@ import {
   SimpleGrid,
   useColorModeValue,
   Text,
+  useToast,
 } from '@chakra-ui/react';
-import { GetAllPet } from '~/lib/components/FetchingPets';
+import { GetAllPet, GetWishlist, AddToWishlist, RemoveFromWishlist } from '~/lib/components/FetchingPets';
 import { useEffect, useState } from 'react';
 import PageLoader from '~/lib/layout/PageLoader';
 import SearchFilter from '~/lib/pages/layout/SearchFilter';
 import { Pet } from '~/lib/components/HandleFunctions';
+import { CheckAuth, GetUsername } from '~/lib/components/Firebase';
+import copy from 'copy-to-clipboard';
 
 const Home = () => {
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
+  const [isAuth, setIsAuth] = useState(false);
+  const [userId, setUserId] = useState('');
+  const [wishlist, setWishlist] = useState<string[]>([]);
+
+  const toast = useToast();
 
   useEffect(() => {
     const fetchPets = async () => {
@@ -32,8 +40,81 @@ const Home = () => {
         setLoading(false);
       }
     };
+    const checkAuth = async () => {
+      try {
+        const isAuthenticated = await CheckAuth();
+        setIsAuth(isAuthenticated);
+        const { uid } = await GetUsername();
+        setUserId(uid);
+        // const userWishlist = await GetWishlist(uid);
+        // setWishlist(userWishlist);
+      } catch (error) {
+        console.error('Error fetching authentication status:', error);
+      }
+    }
     fetchPets();
+    checkAuth();
   }, []);
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      if (userId) {
+        try {
+          const data = await GetWishlist(userId);
+          setWishlist(data);
+        } catch (error) {
+          console.error('Error fetching wishlist:', error);
+        }
+      }
+    };
+    fetchWishlist();
+  }, [userId]);
+
+  const handleFollow = async (petId: any) => {
+    if (isAuth) {
+      try {
+        await AddToWishlist(userId, petId);
+        toast({
+          title: 'Added to wishlist!',
+          status: 'success',
+          duration: 2000,
+          position: 'top',
+          isClosable: true,
+        });
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } catch (error) {
+        console.error('Failed to add to wishlist:', error);
+      }
+    } else {
+      window.alert('Please login to wishlist');
+      window.location.href = '/login';
+    }
+  };
+
+  const handleUnFollow = async (petId: any) => {
+    if (isAuth) {
+      try {
+        await RemoveFromWishlist(userId, petId);
+        toast({
+          title: 'Unfollow from wishlist!',
+          status: 'success',
+          duration: 2000,
+          position: 'top',
+          isClosable: true,
+        });
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } catch (error) {
+        console.error('Failed to unfollow from wishlist:', error);
+      }
+    } else {
+      window.alert('Please login to unfollow from wishlist');
+      window.location.href = '/login';
+    }
+  };
 
   const renderBadge = (label: any, value: any, colorScheme: any) => {
     return (
@@ -80,16 +161,16 @@ const Home = () => {
         setIsAccordionOpen={setIsAccordionOpen}
         pets={pets}
       />
-      <SimpleGrid columns={[1, 2, 3]} gap={5} marginTop={5}>
+      <SimpleGrid gap={5} marginTop={5} columns={{ base: 1, sm: 2, md: 2, xl: 3 }}>
         {filteredPets.map((pet) => (
           <Stack
             key={pet._id}
             borderWidth='1px'
             borderRadius='lg'
             w='100%'
-            minW={{ base: '100%', sm: '100%', md: '500px' }}
+            maxW={{ base: '100%', sm: '100%', xl: '500px' }}
             height='auto'
-            direction={{ base: 'column', md: 'row' }}
+            direction={{ base: 'column', lg: 'row' }}
             bg={useColorModeValue('white', 'gray.900')}
             boxShadow={'2xl'}
             padding={4}
@@ -138,25 +219,66 @@ const Home = () => {
                   _focus={{
                     bg: 'gray.200',
                   }}
-                  onClick={() => window.location.href = '/chat'}
+                  onClick={() => {
+                    if (isAuth) {
+                      copy(String(pet._id));
+                      toast({
+                        title: 'Copied Pet ID, please mention this ID when messaging',
+                        status: 'success',
+                        duration: 2000,
+                        position: 'top',
+                        isClosable: true,
+                      });
+                      setTimeout(() => {
+                        window.location.href = '/chat';
+                      }, 2000);
+                    } else {
+                      window.alert('Please login to message');
+                      window.location.href = '/login';
+                    }
+                  }}
                 >
                   Message
                 </Button>
-                <Button
-                  flex={1}
-                  fontSize={'sm'}
-                  rounded={'full'}
-                  bg={'blue.400'}
-                  color={'white'}
-                  _hover={{
-                    bg: 'blue.500',
-                  }}
-                  _focus={{
-                    bg: 'blue.500',
-                  }}
-                >
-                  Follow
-                </Button>
+                {wishlist.includes(String(pet._id)) ?
+                  <Button
+                    flex={1}
+                    fontSize={'sm'}
+                    rounded={'full'}
+                    bg={'red.400'}
+                    color={'white'}
+                    _hover={{
+                      bg: 'red.500',
+                    }}
+                    _focus={{
+                      bg: 'red.500',
+                    }}
+                    onClick={() => {
+                      handleUnFollow(pet._id)
+                    }}
+                  >
+                    Unfollow
+                  </Button>
+                  :
+                  <Button
+                    flex={1}
+                    fontSize={'sm'}
+                    rounded={'full'}
+                    bg={'blue.400'}
+                    color={'white'}
+                    _hover={{
+                      bg: 'blue.500',
+                    }}
+                    _focus={{
+                      bg: 'blue.500',
+                    }}
+                    onClick={() => {
+                      handleFollow(pet._id)
+                    }}
+                  >
+                    Follow
+                  </Button>
+                }
               </Stack>
             </Stack>
           </Stack>
