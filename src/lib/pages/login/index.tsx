@@ -14,7 +14,7 @@ import {
   useToast
 } from '@chakra-ui/react';
 import React, { useState } from 'react';
-import { HandleLogin } from '../../components/Authentication';
+import { HandleLogin } from '../../components/Firebase';
 
 const Login = () => {
   const [email, setEmailPlaceholder] = useState('');
@@ -35,6 +35,12 @@ const Login = () => {
     setEmptyPasswordPlaceholder(false);
   }
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      loginSubmit();
+    }
+  }
+
   const loginSubmit = async () => {
     let anyError = false;
     if (email === '') {
@@ -52,6 +58,7 @@ const Login = () => {
     if (anyError) return;
     HandleLogin(email, password, toast);
   }
+
   return (
     <Box>
       <Flex direction="column" align="center" gap={4} mt={4} w="100%">
@@ -64,6 +71,7 @@ const Login = () => {
               placeholder="Email"
               value={email}
               onChange={changeEmailPlaceholder}
+              onKeyPress={handleKeyPress}
             />
             <FormErrorMessage>Email is required.</FormErrorMessage>
           </FormControl>
@@ -76,6 +84,7 @@ const Login = () => {
                 value={password}
                 type={showPassword ? 'text' : 'password'}
                 onChange={changePasswordPlaceholder}
+                onKeyDown={handleKeyPress}
               />
               <InputRightElement width='4.5rem'>
                 <Button h='1.75rem' size='sm'
