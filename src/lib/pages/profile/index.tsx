@@ -8,44 +8,67 @@ import {
     Button,
     Center,
     useColorModeValue,
+    AlertDialog,
+    AlertDialogBody,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogContent,
+    AlertDialogOverlay,
+    AlertDialogCloseButton,
+    useDisclosure,
+    useToast
 } from "@chakra-ui/react";
-import { GetUsername, HandleLogout, CheckAuth } from "../../components/Authentication";
-import { useEffect, useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import { GetUsername, HandleLogout, CheckAuth, DeleteAccount } from "../../components/Firebase";
+import React, { useEffect, useState, useRef } from "react";
+import Unauthorize from "~/lib/layout/Unauthorize";
 import PageLoader from "~/lib/layout/PageLoader";
 
 const Profile = () => {
-    const [userid, setUserId] = useState('');
     const [username, setUserName] = useState('');
     const [email, setEmail] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const navigate = useNavigate(); // Initialize useNavigate
+    const [loading, setLoading] = useState(true);
+    const { isOpen, onOpen: onOpenDeleteAlert, onClose: onCloseDeleteAlert } = useDisclosure();
+    const cancelRef = useRef();
+    const toast = useToast();
+
     useEffect(() => {
-        const fetchUsername = async () => {
+        const fetchData = async () => {
             try {
-                const { uid, username, email } = await GetUsername();
-                console.log(uid, username, email);
-                setUserId(uid);
-                setUserName(username[0].toUpperCase() + username.slice(1));
-                setEmail(email);
+                const isAuthenticated = await CheckAuth();
+                setIsAuthenticated(isAuthenticated);
+                if (isAuthenticated) {
+                    const { username, email } = await GetUsername();
+                    setUserName(username[0].toUpperCase() + username.slice(1));
+                    setEmail(email);
+                }
             } catch (error) {
-                console.error('Failed to fetch username:', error);
+                console.error('Error fetching data:', error);
+            } finally {
+                setLoading(false);
             }
         };
-        const checkAuth = async () => {
-            const auth = await CheckAuth();
-            setIsAuthenticated(auth);
-            if (!auth) {
-                navigate('/login'); // Redirect to login if not authenticated
-            }
+        fetchData();
+    }, []);
+
+    const handleDeleteAccount = async () => {
+        try {
+            await DeleteAccount(toast);
+        } catch (error) {
+            console.error('Error deleting account:', error);
+        } finally {
+            onCloseDeleteAlert();
         }
-        fetchUsername();
-        checkAuth();
-    }, [navigate]);
+    };
+
+    if (loading) {
+        return <PageLoader />;
+    }
 
     if (!isAuthenticated) {
-        return <PageLoader />
+        return <Unauthorize />;
     }
+
     return (
         <Center py={6}>
             <Flex direction="column" align="center" gap={4} mt={4} w="100%">
@@ -59,7 +82,8 @@ const Profile = () => {
                     boxShadow={'2xl'}
                     rounded={'2xl'}
                     p={6}
-                    textAlign={'center'}>
+                    textAlign={'center'}
+                >
                     <Avatar
                         size={'xl'}
                         src={''}
@@ -89,35 +113,60 @@ const Profile = () => {
                             fontSize={'sm'}
                             rounded={'full'}
                             p={3}
-                            _focus={{
-                                bg: 'gray.200',
-                            }}>
-                            Change Password
-                        </Button>
-                        <Button
-                            flex={1}
-                            fontSize={'sm'}
-                            rounded={'full'}
-                            p={3}
                             bg={'blue.400'}
                             color={'white'}
-                            boxShadow={
-                                '0px 1px 25px -5px rgb(66 153 225 / 48%), 0 10px 10px -5px rgb(66 153 225 / 43%)'
-                            }
                             _hover={{
                                 bg: 'blue.500',
                             }}
                             _focus={{
                                 bg: 'blue.500',
                             }}
-                            onClick={HandleLogout}>
+                            onClick={HandleLogout}
+                        >
                             Logout
                         </Button>
+                        <Text py={3}>Wanna delete account?</Text>
+                        <Button
+                            flex={1}
+                            fontSize={'sm'}
+                            rounded={'full'}
+                            p={3}
+                            _focus={{
+                                bg: 'gray.200',
+                            }}
+                            onClick={onOpenDeleteAlert}
+                        >
+                            Delete Account
+                        </Button>
+                        <AlertDialog
+                            isOpen={isOpen}
+                            leastDestructiveRef={cancelRef}
+                            onClose={onCloseDeleteAlert}
+                        >
+                            <AlertDialogOverlay>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+                                        Delete Account
+                                    </AlertDialogHeader>
+                                    <AlertDialogBody>
+                                        Are you sure? You can't undo this action afterwards.
+                                    </AlertDialogBody>
+                                    <AlertDialogFooter>
+                                        <Button ref={cancelRef} onClick={onCloseDeleteAlert}>
+                                            Cancel
+                                        </Button>
+                                        <Button colorScheme='red' onClick={handleDeleteAccount} ml={3}>
+                                            Delete
+                                        </Button>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialogOverlay>
+                        </AlertDialog>
                     </Stack>
                 </Box>
             </Flex>
         </Center>
     );
-}
+};
 
 export default Profile;
