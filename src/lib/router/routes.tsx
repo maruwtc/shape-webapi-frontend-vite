@@ -7,6 +7,7 @@ const Chat = React.lazy(() => import('~/lib/pages/chat'));
 const Wishlist = React.lazy(() => import('~/lib/pages/wishlist'));
 const Profile = React.lazy(() => import('~/lib/pages/profile'));
 const Login = React.lazy(() => import('~/lib/pages/login'));
+const Register = React.lazy(() => import('~/lib/pages/register'));
 
 export const routes: Array<PathRouteProps> = [
   {
@@ -32,6 +33,10 @@ export const routes: Array<PathRouteProps> = [
   {
     path: '/login',
     element: <Login />,
+  },
+  {
+    path: '/register',
+    element: <Register />,
   },
 ];
 
