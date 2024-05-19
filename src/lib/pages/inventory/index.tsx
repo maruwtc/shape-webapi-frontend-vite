@@ -29,7 +29,7 @@ import { GetAllPet, DeletePet, CreatePet, UploadImage, UpdatePet } from '~/lib/c
 import { useRef, useEffect, useState } from 'react';
 import PageLoader from '~/lib/layout/PageLoader';
 import Unauthorize from '~/lib/layout/Unauthorize';
-import { CheckAuth } from '~/lib/components/Firebase';
+import { CheckAuth, CheckAdmin } from '~/lib/components/Firebase';
 import SearchFilter from '~/lib/pages/layout/SearchFilter';
 import { Pet } from '~/lib/components/HandleFunctions'
 
@@ -49,27 +49,37 @@ const Inventory = () => {
     const [selectedDeletePet, setSelectedDeletePet] = useState<Pet | null>(null);
     const { isOpen: isEditPetModalOpen, onOpen: opOpenEditPetModal, onClose: onCloseEditPetModal } = useDisclosure();
     const [selectedEditPet, setSelectedEditPet] = useState<Pet | null>(null);
+    const [isAdmin, setIsAdmin] = useState(false);
 
-    const toast = useToast();
+    const toast = useToast({ position: 'top' });
     const cancelRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         const fetchPets = async () => {
             try {
-                const fetchedPets = await GetAllPet();
-                setPets(fetchedPets);
-            } catch (error) {
-                console.error('Failed to fetch pets:', error);
+                const isAuthenticated = await CheckAuth();
+                if (isAuthenticated) {
+                    const isAdmin = await CheckAdmin();
+                    setIsAdmin(isAdmin);
+                    setIsAuthenticated(true);
+                } else {
+                    setIsAuthenticated(false);
+                    return;
+                }
+                try {
+                    const fetchedPets = await GetAllPet();
+                    setPets(fetchedPets);
+                } catch (error) {
+                    console.error('Failed to fetch pets:', error);
+                } finally {
+                    setLoading(false);
+                }
+                console.error('Failed to check user:', Error);
             } finally {
                 setLoading(false);
             }
-        };
-        const checkAuth = async () => {
-            const isAuthenticated = await CheckAuth();
-            setIsAuthenticated(isAuthenticated);
-        };
+        }
         fetchPets();
-        checkAuth();
     }, []);
 
     const handleImageUpload = (event: any) => {
@@ -84,7 +94,7 @@ const Inventory = () => {
                 try {
                     const imageUrl = await UploadImage(base64Image);
                     setImage(imageUrl);
-                    console.log('Image uploaded:', imageUrl);
+                    localStorage.removeItem('image');
                     resolve();
                 } catch (error) {
                     reject(error);
@@ -93,18 +103,9 @@ const Inventory = () => {
             reader.readAsDataURL(file);
         });
         toast.promise(uploadImagePromise, {
-            loading: {
-                title: 'Uploading Image...',
-                description: 'Please wait while we upload the image.',
-            },
-            success: {
-                title: 'Image uploaded.',
-                description: 'Image has been successfully uploaded.',
-            },
-            error: {
-                title: 'Failed to upload image.',
-                description: 'An error occurred while uploading the image.',
-            },
+            loading: { title: 'Uploading Image...' },
+            success: { title: 'Image uploaded.' },
+            error: { title: 'Failed to upload image.' },
         });
     };
 
@@ -119,8 +120,10 @@ const Inventory = () => {
                 position: 'top',
                 isClosable: true,
             });
-            onCloseCreatePetModal();
-            window.location.reload();
+            setTimeout(() => {
+                onCloseCreatePetModal();
+                window.location.reload();
+            }, 2000);
         } catch (error) {
             console.error('Failed to add pet:', error);
             toast({
@@ -156,9 +159,11 @@ const Inventory = () => {
                     position: 'top',
                     isClosable: true,
                 });
-                onCloseEditPetModal();
-                setSelectedEditPet(null);
-                window.location.reload();
+                setTimeout(() => {
+                    onCloseEditPetModal();
+                    setSelectedEditPet(null);
+                    window.location.reload();
+                }, 2000);
             } else {
                 throw new Error('No pet selected for editing.');
             }
@@ -189,9 +194,11 @@ const Inventory = () => {
                 position: 'top',
                 isClosable: true,
             });
-            onCloseDeletePetModal();
-            setSelectedDeletePet(null);
-            window.location.reload();
+            setTimeout(() => {
+                onCloseDeletePetModal();
+                setSelectedDeletePet(null);
+                window.location.reload();
+            }, 2000);
         } catch (error) {
             console.error('Failed to delete pet:', error);
             toast({
@@ -209,7 +216,7 @@ const Inventory = () => {
         return <PageLoader />
     }
 
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !isAdmin) {
         return <Unauthorize />
     }
 
@@ -348,14 +355,14 @@ const Inventory = () => {
                     </ModalBody>
                 </ModalContent>
             </Modal>
-            <SimpleGrid columns={[1, 2, 3]} gap={5} marginTop={5}>
+            <SimpleGrid gap={5} marginTop={5} columns={{ base: 1, sm: 2, md: 2, xl: 3 }}>
                 {filteredPets.map((pet) => (
                     <Stack
                         key={pet._id}
                         borderWidth='1px'
                         borderRadius='lg'
                         w='100%'
-                        minW={{ base: '100%', sm: '100%', md: '500px' }}
+                        maxW={{ base: '100%', sm: '100%', md: '500px' }}
                         height='auto'
                         direction={{ base: 'column', md: 'row' }}
                         bg={useColorModeValue('white', 'gray.900')}
@@ -517,7 +524,7 @@ const Inventory = () => {
                                             }}
                                             onClick={() => handleEditPet({ name: name ? name : selectedEditPet.name, age: age ? age : selectedEditPet.age, breed: breed ? breed : selectedEditPet.breed, location: location ? location : selectedEditPet.location, image: image || selectedEditPet.image })}
                                         >
-                                            Add
+                                            Update
                                         </Button>
                                     </Stack>
                                 </Stack>

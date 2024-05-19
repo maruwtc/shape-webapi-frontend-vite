@@ -14,22 +14,24 @@ import {
     AlertDialogHeader,
     AlertDialogContent,
     AlertDialogOverlay,
-    AlertDialogCloseButton,
     useDisclosure,
-    useToast
+    useToast,
+    Badge,
 } from "@chakra-ui/react";
 import { GetUsername, HandleLogout, CheckAuth, DeleteAccount } from "../../components/Firebase";
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Unauthorize from "~/lib/layout/Unauthorize";
 import PageLoader from "~/lib/layout/PageLoader";
 
 const Profile = () => {
     const [username, setUserName] = useState('');
     const [email, setEmail] = useState('');
+    const [role, setRole] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(true);
     const { isOpen, onOpen: onOpenDeleteAlert, onClose: onCloseDeleteAlert } = useDisclosure();
-    const cancelRef = useRef();
+   
+    const cancelRef = useRef<HTMLButtonElement>(null);
     const toast = useToast();
 
     useEffect(() => {
@@ -38,9 +40,14 @@ const Profile = () => {
                 const isAuthenticated = await CheckAuth();
                 setIsAuthenticated(isAuthenticated);
                 if (isAuthenticated) {
-                    const { username, email } = await GetUsername();
+                    const { username, email, role } = await GetUsername();
                     setUserName(username[0].toUpperCase() + username.slice(1));
                     setEmail(email);
+                    if (role === '' || role === null || role === undefined) {
+                        setRole('User');
+                    } else {
+                        setRole(role);
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -107,6 +114,7 @@ const Profile = () => {
                     <Text fontWeight={600} color={'gray.500'} mb={4}>
                         {email}
                     </Text>
+                    <Badge colorScheme="green">{role}</Badge>
                     <Stack align={'center'} justify={'center'} direction={'column'} mt={6}>
                         <Button
                             flex={1}
