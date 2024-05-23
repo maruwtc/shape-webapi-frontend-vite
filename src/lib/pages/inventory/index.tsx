@@ -94,6 +94,9 @@ const Inventory = () => {
                 try {
                     const imageUrl = await UploadImage(base64Image);
                     setImage(imageUrl);
+                    if (isEditPetModalOpen) {
+                        setSelectedEditPet({ ...selectedEditPet, image: imageUrl } as Pet);
+                    }
                     localStorage.removeItem('image');
                     resolve();
                 } catch (error) {
