@@ -3,16 +3,12 @@ node_modules
 dist
 dist-ssr
 *.local
-
 yarn-error.log*
 .pnpm-debug.log*
-
-# TS
 *.tsbuildinfo
-
-# Turbo
 .turbo
-
-.vscode/settings.json
-
+.vscode
 stats.*
+config
+.github
+.husky
