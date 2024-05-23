@@ -101,9 +101,8 @@ const Login = () => {
               my={5}
               w={'100%'}
             >Login</Button>
-            <SimpleGrid columns={2} spacing={4}>
+            <SimpleGrid columns={1} spacing={4}>
               <Button onClick={() => window.location.href = '/register'}>Register</Button>
-              <Button>Forgot Password</Button>
             </SimpleGrid>
           </FormControl>
         </Stack>
