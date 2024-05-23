@@ -62,7 +62,10 @@ const Register = () => {
 
         const userType = otp.join("") === "1234" && isAdmin ? "admin" : "user";
 
-        if (userType === "user" || userType === "admin") {
+        if (otp.join("") !== "1234" && isAdmin) {
+            setErrors((prev) => ({ ...prev, otp: true }));
+            return;
+        } else if (userType === "user" || userType === "admin") {
             toast.promise(
                 HandleSignup(email, password, userType, toast),
                 {
@@ -136,7 +139,7 @@ const Register = () => {
                                         ))}
                                     </PinInput>
                                 </HStack>
-                                {errors.otp && <FormErrorMessage>OTP is required.</FormErrorMessage>}
+                                {errors.otp && <FormErrorMessage>OTP is not correct.</FormErrorMessage>}
                             </FormControl>
                         </>
                     )}
