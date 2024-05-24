@@ -1,14 +1,7 @@
 node_modules
 .DS_Store
-dist
-dist-ssr
-*.local
-yarn-error.log*
-.pnpm-debug.log*
 *.tsbuildinfo
-.turbo
 .vscode
-stats.*
-config
+config/config.ts
 .github
 .husky

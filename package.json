@@ -28,6 +28,7 @@
     "@fontsource/plus-jakarta-sans": "^5.0.19",
     "@sendbird/uikit-react": "^3.14.6",
     "copy-to-clipboard": "^3.3.3",
+    "dog-names": "^3.0.0",
     "framer-motion": "^11.0.27",
     "million": "3.0.6",
     "react": "^18.2.0",
