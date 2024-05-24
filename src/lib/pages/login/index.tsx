@@ -94,14 +94,12 @@ const Login = () => {
               </InputRightElement>
             </InputGroup>
             <FormErrorMessage>Password is required.</FormErrorMessage>
-            <Button
-              variant="outline"
-              colorScheme="blue"
-              onClick={loginSubmit}
-              my={5}
-              w={'100%'}
-            >Login</Button>
-            <SimpleGrid columns={1} spacing={4}>
+            <SimpleGrid columns={2} spacing={4} mt={10} w={{ base: '100%', md: '300px' }}>
+              <Button
+                variant="outline"
+                colorScheme="blue"
+                onClick={loginSubmit}
+              >Login</Button>
               <Button onClick={() => window.location.href = '/register'}>Register</Button>
             </SimpleGrid>
           </FormControl>

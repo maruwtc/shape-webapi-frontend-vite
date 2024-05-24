@@ -75,7 +75,7 @@ const Home = () => {
       try {
         await AddToWishlist(userId, petId);
         toast({
-          title: 'Added to wishlist!',
+          title: 'Added to wishlist! Reloading...',
           status: 'success',
           duration: 2000,
           position: 'top',
@@ -83,7 +83,7 @@ const Home = () => {
         });
         setTimeout(() => {
           window.location.reload();
-        }, 2000);
+        }, 1000);
       } catch (error) {
         console.error('Failed to add to wishlist:', error);
       }
@@ -98,7 +98,7 @@ const Home = () => {
       try {
         await RemoveFromWishlist(userId, petId);
         toast({
-          title: 'Unfollow from wishlist!',
+          title: 'Unfollow from wishlist! Reloading...',
           status: 'success',
           duration: 2000,
           position: 'top',
@@ -106,7 +106,7 @@ const Home = () => {
         });
         setTimeout(() => {
           window.location.reload();
-        }, 2000);
+        }, 1000);
       } catch (error) {
         console.error('Failed to unfollow from wishlist:', error);
       }
@@ -223,7 +223,7 @@ const Home = () => {
                     if (isAuth) {
                       copy(String(pet._id));
                       toast({
-                        title: 'Copied Pet ID, please mention this ID when messaging',
+                        title: 'Copied Pet ID, please mention this ID when messaging. Redirecting...',
                         status: 'success',
                         duration: 2000,
                         position: 'top',
@@ -231,7 +231,7 @@ const Home = () => {
                       });
                       setTimeout(() => {
                         window.location.href = '/chat';
-                      }, 2000);
+                      }, 1000);
                     } else {
                       window.alert('Please login to message');
                       window.location.href = '/login';
