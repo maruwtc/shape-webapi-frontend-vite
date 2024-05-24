@@ -1,7 +1,7 @@
 import { config } from '../../../config/config';
 
 export const HandleLogin = async (email: string, password: string, toast: any) => {
-  const response = await fetch(config.api_url + '/api/v1/signin', {
+  const response = await fetch(config.api_url + '/api/v1/user/signin', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -33,7 +33,7 @@ export const HandleLogin = async (email: string, password: string, toast: any) =
     } else {
       toast({
         title: 'Success',
-        description: 'Login successful',
+        description: 'Login successful. Redirecting...',
         status: 'success',
         duration: 9000,
         isClosable: true,
@@ -42,7 +42,7 @@ export const HandleLogin = async (email: string, password: string, toast: any) =
       setTimeout(() => {
         sessionStorage.setItem('token', data.token);
         window.location.href = '/profile';
-      }, 2000);
+      }, 1000);
       return true;
     }
   }
@@ -54,7 +54,7 @@ export const HandleLogout = () => {
 }
 
 export const HandleSignup = async (email: string, password: string, role: string, toast: any) => {
-  const response = await fetch(config.api_url + '/api/v1/register', {
+  const response = await fetch(config.api_url + '/api/v1/user/register', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -86,7 +86,7 @@ export const HandleSignup = async (email: string, password: string, role: string
     } else {
       toast({
         title: 'Success',
-        description: 'Signup successful',
+        description: 'Signup successful. Redirecting...',
         status: 'success',
         duration: 9000,
         isClosable: true,
@@ -100,7 +100,7 @@ export const HandleSignup = async (email: string, password: string, role: string
 }
 
 export const CheckAuth = async () => {
-  const response = await fetch(config.api_url + '/api/v1/checkauth', {
+  const response = await fetch(config.api_url + '/api/v1/user/checkauth', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -126,7 +126,7 @@ export const CheckAuth = async () => {
 }
 
 export const GetUsername = async () => {
-  const response = await fetch(config.api_url + '/api/v1/getuser', {
+  const response = await fetch(config.api_url + '/api/v1/user/getuser', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ export const GetUsername = async () => {
 };
 
 export const DeleteAccount = async (toast: any) => {
-  const response = await fetch(config.api_url + '/api/v1/deleteaccount', {
+  const response = await fetch(config.api_url + '/api/v1/user/deleteaccount', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -183,7 +183,7 @@ export const DeleteAccount = async (toast: any) => {
     } else {
       toast({
         title: 'Success',
-        description: 'Account deleted',
+        description: 'Account deleted. Redirecting...',
         status: 'success',
         duration: 9000,
         isClosable: true,
@@ -197,7 +197,7 @@ export const DeleteAccount = async (toast: any) => {
 }
 
 export const CheckAdmin = async () => {
-  const response = await fetch(config.api_url + '/api/v1/checkadmin', {
+  const response = await fetch(config.api_url + '/api/v1/user/checkadmin', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
