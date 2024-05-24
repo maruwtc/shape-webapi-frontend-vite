@@ -24,14 +24,17 @@ import {
     AlertDialogCloseButton,
     AlertDialogBody,
     AlertDialogFooter,
+    Tooltip,
+    Select,
 } from '@chakra-ui/react';
-import { GetAllPet, DeletePet, CreatePet, UploadImage, UpdatePet } from '~/lib/components/FetchingPets';
+import { GetAllPet, DeletePet, CreatePet, UploadImage, UpdatePet, DogAPI, DogAPIList } from '~/lib/components/FetchingPets';
 import { useRef, useEffect, useState } from 'react';
 import PageLoader from '~/lib/layout/PageLoader';
 import Unauthorize from '~/lib/layout/Unauthorize';
 import { CheckAuth, CheckAdmin } from '~/lib/components/Firebase';
 import SearchFilter from '~/lib/pages/layout/SearchFilter';
 import { Pet } from '~/lib/components/HandleFunctions'
+import { randomDogName } from 'dog-names';
 
 const Inventory = () => {
     const [pets, setPets] = useState<Pet[]>([]);
@@ -50,6 +53,8 @@ const Inventory = () => {
     const { isOpen: isEditPetModalOpen, onOpen: opOpenEditPetModal, onClose: onCloseEditPetModal } = useDisclosure();
     const [selectedEditPet, setSelectedEditPet] = useState<Pet | null>(null);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [dogapiImage, setDogapiImage] = useState('');
+    const [dogBreeds, setDogBreeds] = useState<string[]>([]);
 
     const toast = useToast({ position: 'top' });
     const cancelRef = useRef<HTMLButtonElement>(null);
@@ -79,7 +84,16 @@ const Inventory = () => {
                 setLoading(false);
             }
         }
+        const fetchDogBreeds = async () => {
+            try {
+                const data = await DogAPIList();
+                setDogBreeds(Object.keys(data.message));
+            } catch (error) {
+                console.error('Failed to fetch dog breeds:', error);
+            }
+        }
         fetchPets();
+        fetchDogBreeds();
     }, []);
 
     const handleImageUpload = (event: any) => {
@@ -117,7 +131,7 @@ const Inventory = () => {
             await CreatePet(pet);
             toast({
                 title: 'Pet added.',
-                description: 'Pet has been successfully added.',
+                description: 'Pet has been successfully added. Reloading...',
                 status: 'success',
                 duration: 3000,
                 position: 'top',
@@ -126,7 +140,7 @@ const Inventory = () => {
             setTimeout(() => {
                 onCloseCreatePetModal();
                 window.location.reload();
-            }, 2000);
+            }, 1000);
         } catch (error) {
             console.error('Failed to add pet:', error);
             toast({
@@ -156,7 +170,7 @@ const Inventory = () => {
                 }
                 toast({
                     title: 'Pet updated.',
-                    description: 'Pet has been successfully updated.',
+                    description: 'Pet has been successfully updated. Reloading...',
                     status: 'success',
                     duration: 3000,
                     position: 'top',
@@ -166,7 +180,7 @@ const Inventory = () => {
                     onCloseEditPetModal();
                     setSelectedEditPet(null);
                     window.location.reload();
-                }, 2000);
+                }, 1000);
             } else {
                 throw new Error('No pet selected for editing.');
             }
@@ -191,7 +205,7 @@ const Inventory = () => {
             }
             toast({
                 title: 'Pet deleted.',
-                description: 'Pet has been successfully deleted.',
+                description: 'Pet has been successfully deleted. Reloading...',
                 status: 'success',
                 duration: 3000,
                 position: 'top',
@@ -201,7 +215,7 @@ const Inventory = () => {
                 onCloseDeletePetModal();
                 setSelectedDeletePet(null);
                 window.location.reload();
-            }, 2000);
+            }, 1000);
         } catch (error) {
             console.error('Failed to delete pet:', error);
             toast({
@@ -214,6 +228,42 @@ const Inventory = () => {
             });
         }
     };
+
+    const handleDogAPI = async (breed: string) => {
+        try {
+            if (breed !== "") {
+                const data = await DogAPI(breed);
+                setDogapiImage(data.message);
+                toast.promise(
+                    DogAPI(breed),
+                    {
+                        loading: { title: 'Fetching dog image...' },
+                        success: { title: 'Dog image fetched.' },
+                        error: { title: 'Failed to fetch dog image.' },
+                    }
+                );
+            } else {
+                toast({
+                    title: 'No breed selected.',
+                    description: 'Please select a breed before fetching the dog image.',
+                    status: 'warning',
+                    duration: 3000,
+                    position: 'top',
+                    isClosable: true,
+                });
+            }
+        } catch (error) {
+            console.error('Failed to fetch dog image:', error);
+            toast({
+                title: 'Failed to fetch dog image.',
+                description: 'An error occurred while fetching the dog image.',
+                status: 'error',
+                duration: 3000,
+                position: 'top',
+                isClosable: true,
+            });
+        }
+    }
 
     if (loading) {
         return <PageLoader />
@@ -265,7 +315,7 @@ const Inventory = () => {
                 pets={pets}
             />
             <Button onClick={opOpenCreatePetModal}>Add New Pet</Button>
-            <Modal isOpen={isCreatePetModalOpen} onClose={onCloseCreatePetModal}>
+            <Modal isOpen={isCreatePetModalOpen} onClose={() => { onCloseCreatePetModal(); setDogapiImage('') }}>
                 <ModalOverlay />
                 <ModalContent maxW={{ base: '100%', md: '70%', sm: '80%' }}>
                     <ModalHeader>Add New Pet</ModalHeader>
@@ -284,17 +334,19 @@ const Inventory = () => {
                             mb={4}
                         >
                             <Flex flex={2}>
-                                <Image
-                                    objectFit='cover'
-                                    boxSize='100%'
-                                    maxW={{ base: '100%', md: '100%' }}
-                                    mx={'auto'}
-                                    borderRadius={'lg'}
-                                    bgColor={'gray.200'}
-                                    src={image || 'https://static.vecteezy.com/system/resources/previews/008/480/185/original/upload-click-with-cursor-3d-icon-model-cartoon-style-concept-render-illustration-png.png'}
-                                    _hover={{ cursor: 'pointer' }}
-                                    onClick={() => document.getElementById('uploadInput')?.click()}
-                                />
+                                <Tooltip label='Click to upload image' aria-label='Click to upload image'>
+                                    <Image
+                                        objectFit='cover'
+                                        boxSize='100%'
+                                        maxW={{ base: '100%', md: '100%' }}
+                                        mx={'auto'}
+                                        borderRadius={'lg'}
+                                        bgColor={'gray.200'}
+                                        src={image || 'https://static.vecteezy.com/system/resources/previews/008/480/185/original/upload-click-with-cursor-3d-icon-model-cartoon-style-concept-render-illustration-png.png'}
+                                        _hover={{ cursor: 'pointer' }}
+                                        onClick={() => document.getElementById('uploadInput')?.click()}
+                                    />
+                                </Tooltip>
                                 <Input
                                     type="file"
                                     id="uploadInput"
@@ -322,10 +374,19 @@ const Inventory = () => {
                                     onChange={(e) => setAge(e.target.value)}
                                 />
                                 <Text>Breed:</Text>
-                                <Input
-                                    placeholder='Breed'
+                                <Select
+                                    placeholder='Select breed'
                                     value={breed}
                                     onChange={(e) => setBreed(e.target.value)}
+                                >
+                                    {dogBreeds.map((breed) => (
+                                        <option key={breed[0].toUpperCase() + breed.slice(1)} value={breed[0].toUpperCase() + breed.slice(1)}>{breed[0].toUpperCase() + breed.slice(1)}</option>
+                                    ))}
+                                </Select>
+                                <Button onClick={() => handleDogAPI(breed)}>Fetch Dog Image</Button>
+                                <Image
+                                    src={dogapiImage}
+                                    width={200}
                                 />
                                 <Text>Location:</Text>
                                 <Input
@@ -348,7 +409,7 @@ const Inventory = () => {
                                         _focus={{
                                             bg: 'gray.200',
                                         }}
-                                        onClick={() => handleCreatePet({ name, age, breed, location, image: image || 'https://via.placeholder.com/150' })}
+                                        onClick={() => handleCreatePet({ name: name ? name : randomDogName().toString(), age, breed, location, image: image || dogapiImage })}
                                     >
                                         Add
                                     </Button>
@@ -379,7 +440,7 @@ const Inventory = () => {
                                 maxW={{ base: '200px', md: '100%' }}
                                 mx={'auto'}
                                 borderRadius={'lg'}
-                                src={pet.image ? pet.image : 'https://via.placeholder.com/150'}
+                                src={pet.image ? pet.image : dogapiImage}
                                 alt={pet.name}
                             />
                         </Flex>
@@ -442,7 +503,7 @@ const Inventory = () => {
                 ))}
             </SimpleGrid>
             {selectedEditPet && (
-                <Modal isOpen={isEditPetModalOpen} onClose={onCloseEditPetModal}>
+                <Modal isOpen={isEditPetModalOpen} onClose={() => { onCloseEditPetModal(); setDogapiImage(''); }} >
                     <ModalOverlay />
                     <ModalContent maxW={{ base: '100%', md: '70%', sm: '80%' }}>
                         <ModalHeader>Add New Pet</ModalHeader>
@@ -461,17 +522,19 @@ const Inventory = () => {
                                 mb={4}
                             >
                                 <Flex flex={2}>
-                                    <Image
-                                        objectFit='cover'
-                                        boxSize='100%'
-                                        maxW={{ base: '100%', md: '100%' }}
-                                        mx={'auto'}
-                                        borderRadius={'lg'}
-                                        bgColor={'gray.200'}
-                                        src={selectedEditPet.image}
-                                        _hover={{ cursor: 'pointer' }}
-                                        onClick={() => document.getElementById('uploadInput')?.click()}
-                                    />
+                                    <Tooltip label='Click to upload image' aria-label='Click to upload image'>
+                                        <Image
+                                            objectFit='cover'
+                                            boxSize='100%'
+                                            maxW={{ base: '100%', md: '100%' }}
+                                            mx={'auto'}
+                                            borderRadius={'lg'}
+                                            bgColor={'gray.200'}
+                                            src={selectedEditPet.image}
+                                            _hover={{ cursor: 'pointer' }}
+                                            onClick={() => document.getElementById('uploadInput')?.click()}
+                                        />
+                                    </Tooltip>
                                     <Input
                                         type="file"
                                         id="uploadInput"
@@ -499,10 +562,24 @@ const Inventory = () => {
                                         onChange={(e) => setAge(e.target.value)}
                                     />
                                     <Text>Breed:</Text>
-                                    <Input
+                                    {/* <Input
                                         placeholder={selectedEditPet.breed}
                                         value={breed}
                                         onChange={(e) => setBreed(e.target.value)}
+                                    /> */}
+                                    <Select
+                                        placeholder='Select breed'
+                                        value={breed}
+                                        onChange={(e) => setBreed(e.target.value)}
+                                    >
+                                        {dogBreeds.map((breed) => (
+                                            <option key={breed[0].toUpperCase() + breed.slice(1)} value={breed[0].toUpperCase() + breed.slice(1)}>{breed[0].toUpperCase() + breed.slice(1)}</option>
+                                        ))}
+                                    </Select>
+                                    <Button onClick={() => handleDogAPI(breed)}>Fetch Dog Image</Button>
+                                    <Image
+                                        src={dogapiImage}
+                                        width={200}
                                     />
                                     <Text>Location:</Text>
                                     <Input

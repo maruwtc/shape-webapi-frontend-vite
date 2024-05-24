@@ -118,7 +118,7 @@ export const UploadImage = async (base64Image: any) => {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
             image: base64Image,
             token: sessionStorage.getItem('token'),
         }),
@@ -132,10 +132,10 @@ export const UploadImage = async (base64Image: any) => {
 
 export const GetWishlist = async (id: string) => {
     try {
-        const response = await fetch(config.api_url + '/api/v1/users/'+ id +'/wishlist', {
+        const response = await fetch(config.api_url + '/api/v1/user/' + id + '/wishlist', {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json', 
+                'Content-Type': 'application/json',
                 'token': String(sessionStorage.getItem('token'))
             },
         });
@@ -153,7 +153,7 @@ export const GetWishlist = async (id: string) => {
 
 export const AddToWishlist = async (id: string, petId: string) => {
     try {
-        const response = await fetch(config.api_url + '/api/v1/users/'+ id +'/wishlist', {
+        const response = await fetch(config.api_url + '/api/v1/user/' + id + '/wishlist', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -177,7 +177,7 @@ export const AddToWishlist = async (id: string, petId: string) => {
 
 export const RemoveFromWishlist = async (id: string, petId: string) => {
     try {
-        const response = await fetch(config.api_url + '/api/v1/users/'+ id +'/wishlist', {
+        const response = await fetch(config.api_url + '/api/v1/user/' + id + '/wishlist', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -196,5 +196,51 @@ export const RemoveFromWishlist = async (id: string, petId: string) => {
     } catch (error) {
         console.error('Failed to remove from wishlist:', error);
         return {};
+    }
+}
+
+export const DogAPI = async (value: any) => {
+    if (value === "") {
+        return [];
+    } else {
+        try {
+            const response = await fetch(config.api_url + '/api/v1/petapi/breed', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                    'Breed': value.toLowerCase(),
+                },
+            });
+            if (!response.ok) {
+                return [];
+            } else {
+                const data = await response.json();
+                return data;
+            }
+        } catch (error) {
+            console.error('Failed to fetch dog:', error);
+            return [];
+        }
+    }
+}
+
+export const DogAPIList = async () => {
+    try {
+        const response = await fetch(config.api_url + '/api/v1/petapi/breeds', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!response.ok) {
+            return [];
+        } else {
+            const data = await response.json();
+            return data;
+        }
+    } catch (error) {
+        console.error('Failed to fetch dog list:', error);
+        return [];
     }
 }
