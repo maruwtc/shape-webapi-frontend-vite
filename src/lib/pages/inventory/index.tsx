@@ -426,9 +426,9 @@ const Inventory = () => {
                         borderWidth='1px'
                         borderRadius='lg'
                         w='100%'
-                        maxW={{ base: '100%', sm: '100%', md: '500px' }}
+                        maxW={{ base: '100%', sm: '100%', xl: '500px' }}
                         height='auto'
-                        direction={{ base: 'column', md: 'row' }}
+                        direction={{ base: 'column', lg: 'row' }}
                         bg={useColorModeValue('white', 'gray.900')}
                         boxShadow={'2xl'}
                         padding={4}
@@ -438,6 +438,7 @@ const Inventory = () => {
                                 objectFit='cover'
                                 boxSize='100%'
                                 maxW={{ base: '200px', md: '100%' }}
+                                maxH={{ base: '200px', md: '250px' }}
                                 mx={'auto'}
                                 borderRadius={'lg'}
                                 src={pet.image ? pet.image : dogapiImage}
@@ -562,11 +563,12 @@ const Inventory = () => {
                                         onChange={(e) => setAge(e.target.value)}
                                     />
                                     <Text>Breed:</Text>
-                                    {/* <Input
+                                    <Input
                                         placeholder={selectedEditPet.breed}
                                         value={breed}
                                         onChange={(e) => setBreed(e.target.value)}
-                                    /> */}
+                                        disabled
+                                    />
                                     <Select
                                         placeholder='Select breed'
                                         value={breed}

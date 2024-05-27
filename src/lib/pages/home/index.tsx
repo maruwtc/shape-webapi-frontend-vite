@@ -46,8 +46,6 @@ const Home = () => {
         setIsAuth(isAuthenticated);
         const { uid } = await GetUsername();
         setUserId(uid);
-        // const userWishlist = await GetWishlist(uid);
-        // setWishlist(userWishlist);
       } catch (error) {
         console.error('Error fetching authentication status:', error);
       }
@@ -88,8 +86,16 @@ const Home = () => {
         console.error('Failed to add to wishlist:', error);
       }
     } else {
-      window.alert('Please login to wishlist');
-      window.location.href = '/login';
+      toast({
+        title: 'Please login to wishlist',
+        status: 'warning',
+        duration: 2000,
+        position: 'top',
+        isClosable: true,
+      });
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1000);
     }
   };
 
@@ -180,6 +186,7 @@ const Home = () => {
                 objectFit='cover'
                 boxSize='100%'
                 maxW={{ base: '200px', md: '100%' }}
+                maxH={{ base: '200px', md: '250px' }}
                 mx={'auto'}
                 borderRadius={'lg'}
                 src={pet.image ? pet.image : 'https://via.placeholder.com/150'}

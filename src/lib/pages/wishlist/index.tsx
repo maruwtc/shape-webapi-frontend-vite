@@ -34,7 +34,13 @@ const Wishlist = () => {
                     const { uid } = await GetUsername();
                     setUserId(uid);
                 } else {
-                    console.log('Not authenticated');
+                    toast({
+                        title: 'Please login to view your wishlist',
+                        status: 'info',
+                        duration: 2000,
+                        position: 'top',
+                        isClosable: true,
+                    });
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -123,9 +129,9 @@ const Wishlist = () => {
                     borderWidth='1px'
                     borderRadius='lg'
                     w='100%'
-                    maxW={{ base: '100%', sm: '100%', md: '500px' }}
+                    maxW={{ base: '100%', sm: '100%', xl: '500px' }}
                     height='auto'
-                    direction={{ base: 'column', md: 'row' }}
+                    direction={{ base: 'column', lg: 'row' }}
                     bg={useColorModeValue('white', 'gray.900')}
                     boxShadow={'2xl'}
                     padding={4}
@@ -135,6 +141,7 @@ const Wishlist = () => {
                             objectFit='cover'
                             boxSize='100%'
                             maxW={{ base: '200px', md: '100%' }}
+                            maxH={{ base: '200px', md: '250px' }}
                             mx={'auto'}
                             borderRadius={'lg'}
                             src={pet.image ? pet.image : 'https://via.placeholder.com/150'}

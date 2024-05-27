@@ -66,7 +66,7 @@ const SearchFilter = ({
                 <Stack spacing={4} p={4} borderWidth='1px' borderRadius='lg'>
                     <Heading size='md'>Filter by:</Heading>
                     <Flex direction='column'>
-                        <Flex pb={3}>
+                        <Flex pb={3} wrap={'wrap'} alignItems={'center'}>
                             <Text>Breed:</Text>
                             {pets.map((pet: any, index: any, array: any) => {
                                 const isDuplicate = array.findIndex((item: any) => item.breed === pet.breed) !== index;
@@ -84,7 +84,7 @@ const SearchFilter = ({
                                 );
                             })}
                         </Flex>
-                        <Flex>
+                        <Flex wrap={'wrap'} alignItems={'center'}>
                             <Text>Location:</Text>
                             {pets.map((pet: any, index: any, array: any) => {
                                 const isDuplicate = array.findIndex((item: any) => item.location === pet.location) !== index;

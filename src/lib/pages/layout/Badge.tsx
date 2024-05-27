@@ -9,6 +9,7 @@ const RenderBadge = ({ label, value, colorScheme, onClick }: { label: string, va
       px={2}
       py={1}
       ml={1}
+      my={1}
       borderRadius='full'
       bg={useColorModeValue('gray.50', 'gray.800')}
       fontWeight='400'

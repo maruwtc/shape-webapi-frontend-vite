@@ -68,7 +68,7 @@ export default function Sidebar({ children }: { children: ReactNode }) {
       <Box ml={{ base: 0, md: 60 }} p="4">
         {children}
       </Box>
-      <Stack bottom={0} position="fixed" p={4}>
+      <Stack bottom={0} position="fixed" p={4} display={{ base: 'none', md: 'flex' }}>
         <ThemeToggle />
       </Stack>
     </Box>
