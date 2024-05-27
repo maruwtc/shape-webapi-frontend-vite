@@ -17,8 +17,8 @@ import {
     PinInputField,
     SimpleGrid,
 } from "@chakra-ui/react";
-import { useState } from "react";
-import { HandleSignup } from "../../../lib/components/Firebase";
+import { useEffect, useState } from "react";
+import { CheckAuth, HandleSignup } from "../../../lib/components/Firebase";
 
 const Register = () => {
     const [email, setEmail] = useState("");
@@ -31,8 +31,21 @@ const Register = () => {
         password: false,
         otp: false,
     });
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     const toast = useToast({ position: 'top' });
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const isAuthenticated = await CheckAuth();
+                setIsAuthenticated(isAuthenticated);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+        checkAuth();
+    }, []);
 
     const handleChange = (setter: any) => (e: any) => setter(e.target.value);
     const handleOtpChange = (index: any) => (e: any) => {
@@ -61,7 +74,6 @@ const Register = () => {
         }
 
         const userType = otp.join("") === "1234" && isAdmin ? "admin" : "user";
-
         if (otp.join("") !== "1234" && isAdmin) {
             setErrors((prev) => ({ ...prev, otp: true }));
             return;
@@ -78,6 +90,10 @@ const Register = () => {
             setErrors((prev) => ({ ...prev, otp: true }));
         }
     };
+
+    if (isAuthenticated) {
+        window.location.href = "/profile";
+    } 
 
     return (
         <Box>

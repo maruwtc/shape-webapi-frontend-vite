@@ -13,8 +13,9 @@ import {
   SimpleGrid,
   useToast
 } from '@chakra-ui/react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HandleLogin } from '../../components/Firebase';
+import { CheckAuth } from "../../../lib/components/Firebase";
 
 const Login = () => {
   const [email, setEmailPlaceholder] = useState('');
@@ -22,8 +23,21 @@ const Login = () => {
   const [emptyEmailPlaceholder, setEmptyEmailPlaceholder] = useState(false);
   const [emptyPasswordPlaceholder, setEmptyPasswordPlaceholder] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const toast = useToast();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const isAuthenticated = await CheckAuth();
+        setIsAuthenticated(isAuthenticated);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+    checkAuth();
+  }, []);
 
   const changeEmailPlaceholder = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmailPlaceholder(e.target.value);
@@ -57,6 +71,10 @@ const Login = () => {
     }
     if (anyError) return;
     HandleLogin(email, password, toast);
+  }
+
+  if (isAuthenticated) {
+    window.location.href = "/profile";
   }
 
   return (

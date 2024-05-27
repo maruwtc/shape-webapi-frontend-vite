@@ -18,7 +18,7 @@ import {
     useToast,
     Badge,
 } from "@chakra-ui/react";
-import { GetUsername, HandleLogout, CheckAuth, DeleteAccount } from "../../components/Firebase";
+import { GetUsername, HandleLogout, CheckAuth, DeleteAccount, CheckAdmin } from "../../components/Firebase";
 import { useEffect, useState, useRef } from "react";
 import Unauthorize from "~/lib/layout/Unauthorize";
 import PageLoader from "~/lib/layout/PageLoader";
@@ -40,13 +40,14 @@ const Profile = () => {
                 const isAuthenticated = await CheckAuth();
                 setIsAuthenticated(isAuthenticated);
                 if (isAuthenticated) {
-                    const { username, email, role } = await GetUsername();
+                    const { username, email } = await GetUsername();
                     setUserName(username[0].toUpperCase() + username.slice(1));
                     setEmail(email);
-                    if (role === '' || role === null || role === undefined) {
-                        setRole('User');
+                    const isAdmin = await CheckAdmin();
+                    if (isAdmin) {
+                        setRole('Admin');
                     } else {
-                        setRole(role);
+                        setRole('User');
                     }
                 }
             } catch (error) {
